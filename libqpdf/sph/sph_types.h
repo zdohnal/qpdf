@@ -407,6 +407,12 @@ typedef __arch_dependant__ sph_u64;
  */
 typedef __arch_dependant__ sph_s64;
 
+#ifdef HAVE_GNUTLS
+typedef gnutls_hash_hd_t sph_sha256_context;
+typedef gnutls_hash_hd_t sph_sha384_context;
+typedef gnutls_hash_hd_t sph_sha512_context;
+#endif
+
 /**
  * This macro expands the token <code>x</code> into a suitable
  * constant expression of type <code>sph_u32</code>. Depending on

@@ -1,6 +1,10 @@
 #ifndef RC4_HH
 #define RC4_HH
 
+#ifdef HAVE_GNUTLS
+# include <gnutls/crypto.h>
+#endif
+
 #include <stddef.h>
 
 class RC4
@@ -13,6 +17,10 @@ class RC4
     void process(unsigned char* in_data, size_t len,
                  unsigned char* out_data = 0);
 
+#ifdef HAVE_GNUTLS
+    ~RC4();
+#endif
+
   private:
     class RC4Key
     {
@@ -23,6 +31,11 @@ class RC4
     };
 
     RC4Key key;
+
+
+#ifdef HAVE_GNUTLS
+    gnutls_cipher_hd_t ctx;
+#endif
 };
 
 #endif // RC4_HH

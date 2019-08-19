@@ -65,6 +65,12 @@ class Pl_AES_PDF: public Pipeline
     bool use_zero_iv;
     bool use_specified_iv;
     bool disable_padding;
+#ifdef HAVE_GNUTLS
+#include <gnutls/crypto.h>
+
+    gnutls_cipher_hd_t ctx;
+    unsigned int keylen;
+#endif
 };
 
 #endif // PL_AES_PDF_HH

@@ -488,6 +488,27 @@ AC_ARG_ENABLE(show-failed-test-output,
     fi],
    [SHOW_FAILED_TEST_OUTPUT=0])
 
+AC_MSG_CHECKING(if cryptography will be supplied by GNU TLS)
+AC_SUBST(HAVE_GNUTLS)
+AC_ARG_ENABLE(gnutls,
+   AS_HELP_STRING([--enable-gnutls],
+                  [enable cryptography by GNUTLS]),
+   [if test "$enableval" = "yes"; then
+      HAVE_GNUTLS=1
+      GNUTLSFLAGS=`pkg-config --cflags gnutls`
+      GNUTLSLIBS=`pkg-config --libs gnutls`
+      LIBS="$LIBS $GNUTLSLIBS"
+      CPPFLAGS="$CPPFLAGS $GNUTLSFLAGS"
+    else
+      HAVE_GNUTLS=0
+    fi],
+   [HAVE_GNUTLS=0])
+if test "$HAVE_GNUTLS" == "1" ; then
+   AC_MSG_RESULT(yes)
+else
+   AC_MSG_RESULT(no)
+fi
+
 AC_ARG_WITH(docbook-xsl,
    AS_HELP_STRING([--with-docbook-xsl=DIR],
 		  [location of docbook 4.x xml stylesheets]),

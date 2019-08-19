@@ -33,6 +33,10 @@
 #include <stddef.h>
 #include <string.h>
 
+#ifdef HAVE_GNUTLS
+# include "sha2big-gnutls.c"
+#else
+
 #include "sph/sph_sha2.h"
 
 #if SPH_64
@@ -245,3 +249,5 @@ sph_sha384_comp(const sph_u64 msg[16], sph_u64 val[8])
 }
 
 #endif
+
+#endif /* HAVE_GNUTLS */

@@ -1,6 +1,10 @@
 #ifndef MD5_HH
 #define MD5_HH
 
+#ifdef HAVE_GNUTLS
+# include <gnutls/crypto.h>
+#endif
+
 #include <qpdf/DLL.h>
 #include <qpdf/qpdf-config.h>
 #include <qpdf/Types.h>
@@ -89,6 +93,9 @@ class MD5
 
     bool finalized;
     Digest digest_val;
+#ifdef HAVE_GNUTLS
+    gnutls_hash_hd_t ctx;
+#endif
 };
 
 #endif // MD5_HH
