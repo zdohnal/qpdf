@@ -1,22 +1,14 @@
 #include <qpdf/Pl_AES_PDF.hh>
-#include <qpdf/QUtil.hh>
-#include <cstring>
-#include <assert.h>
-#include <stdexcept>
+#include <gnutls/crypto.h>
 #include <qpdf/QIntC.hh>
-#include <string>
-#include <stdlib.h>
-
-#ifdef HAVE_GNUTLS
-# include "Pl_AES_PDF-gnutls.cc"
-#else
-# include <qpdf/rijndael.h>
+#include <qpdf/QUtil.hh>
+#include <qpdf/rijndael-gnutls.h>
 
 bool Pl_AES_PDF::use_static_iv = false;
 
 Pl_AES_PDF::Pl_AES_PDF(char const* identifier, Pipeline* next,
 		       bool encrypt, unsigned char const* key,
-                       size_t key_bytes) :
+                       unsigned int key_bytes) :
     Pipeline(identifier, next),
     encrypt(encrypt),
     cbc_mode(true),
@@ -27,29 +19,20 @@ Pl_AES_PDF::Pl_AES_PDF(char const* identifier, Pipeline* next,
     use_specified_iv(false),
     disable_padding(false)
 {
-    size_t keybits = 8 * key_bytes;
+    unsigned int keybits = 8 * key_bytes;
+    this->keylen = key_bytes;
+    this->ctx = nullptr;
     assert(key_bytes == KEYLENGTH(keybits));
-    this->key = PointerHolder<unsigned char>(
+    this->key = PointerHolder<uint32_t>(
         true, new unsigned char[key_bytes]);
     this->rk = PointerHolder<uint32_t>(
         true, new uint32_t[RKLENGTH(keybits)]);
     size_t rk_bytes = RKLENGTH(keybits) * sizeof(uint32_t);
     std::memcpy(this->key.getPointer(), key, key_bytes);
-    std::memset(this->rk.getPointer(), 0, rk_bytes);
+    std::memset(this->rk.getPointer, 0, rk_bytes);
     std::memset(this->inbuf, 0, this->buf_size);
     std::memset(this->outbuf, 0, this->buf_size);
     std::memset(this->cbc_block, 0, this->buf_size);
-    if (encrypt)
-    {
-	this->nrounds = rijndaelSetupEncrypt(
-            this->rk.getPointer(), this->key.getPointer(), keybits);
-    }
-    else
-    {
-	this->nrounds = rijndaelSetupDecrypt(
-            this->rk.getPointer(), this->key.getPointer(), keybits);
-    }
-    assert(this->nrounds == NROUNDS(keybits));
 }
 
 Pl_AES_PDF::~Pl_AES_PDF()
@@ -152,6 +135,10 @@ Pl_AES_PDF::finish()
 	}
 	flush(! this->disable_padding);
     }
+
+    if (this->cbc_mode)
+	rijndaelFinish(this->ctx);
+
     getNext()->finish();
 }
 
@@ -214,39 +201,26 @@ Pl_AES_PDF::flush(bool strip_padding)
 		// vector.  There's nothing to write at this time.
 		memcpy(this->cbc_block, this->inbuf, this->buf_size);
 		this->offset = 0;
+		rijndaelInit(&(this->ctx), this->key.getPointer(), this->keylen, this->cbc_block, this->buf_size);
 		return;
 	    }
+	    rijndaelInit(&(this->ctx), this->key.getPointer(), this->keylen, this->cbc_block, this->buf_size);
 	}
     }
 
     if (this->encrypt)
     {
 	if (this->cbc_mode)
-	{
-	    for (unsigned int i = 0; i < this->buf_size; ++i)
-	    {
-		this->inbuf[i] ^= this->cbc_block[i];
-	    }
-	}
-	rijndaelEncrypt(this->rk.getPointer(),
-                        this->nrounds, this->inbuf, this->outbuf);
-	if (this->cbc_mode)
-	{
-	    memcpy(this->cbc_block, this->outbuf, this->buf_size);
-	}
+	    rijndaelCBCEncrypt(this->ctx, this->inbuf, this->outbuf, this->buf_size);
+	else
+	    rijndaelECBEncrypt(this->key.getPointer(), this->keylen, this->cbc_block, this->inbuf, this->outbuf, this->buf_size);
     }
     else
     {
-	rijndaelDecrypt(this->rk.getPointer(),
-                        this->nrounds, this->inbuf, this->outbuf);
 	if (this->cbc_mode)
-	{
-	    for (unsigned int i = 0; i < this->buf_size; ++i)
-	    {
-		this->outbuf[i] ^= this->cbc_block[i];
-	    }
-	    memcpy(this->cbc_block, this->inbuf, this->buf_size);
-	}
+	    rijndaelCBCDecrypt(this->ctx, this->inbuf, this->outbuf, this->buf_size);
+	else
+	    rijndaelECBDecrypt(this->key.getPointer(), this->keylen, this->cbc_block, this->inbuf, this->outbuf, this->buf_size);
     }
     unsigned int bytes = this->buf_size;
     if (strip_padding)
@@ -272,4 +246,3 @@ Pl_AES_PDF::flush(bool strip_padding)
     getNext()->write(this->outbuf, bytes);
     this->offset = 0;
 }
-#endif /* HAVE_GNUTLS */
