@@ -17,7 +17,7 @@ RC4::RC4(unsigned char const* key_data, int key_len)
     gnutls_datum_t key;
 
     key.data = const_cast<unsigned char*>(key_data);
-    key.size = key_len;
+    key.size = QIntC::to_uint(key_len);
 
     ret = gnutls_cipher_init(&(this->ctx),
                              alg,
@@ -41,7 +41,7 @@ RC4::~RC4()
 }
 
 void
-RC4::process(unsigned char *in_data, int len, unsigned char* out_data)
+RC4::process(unsigned char *in_data, size_t len, unsigned char* out_data)
 {
     if (out_data == 0)
     {

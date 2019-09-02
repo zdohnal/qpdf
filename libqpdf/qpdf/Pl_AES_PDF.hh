@@ -72,7 +72,7 @@ class Pl_AES_PDF: public Pipeline
 
 #ifdef HAVE_GNUTLS
     gnutls_cipher_hd_t ctx;
-    unsigned int keylen;
+    size_t keylen;
 #endif
 };
 

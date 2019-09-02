@@ -8,7 +8,7 @@ bool Pl_AES_PDF::use_static_iv = false;
 
 Pl_AES_PDF::Pl_AES_PDF(char const* identifier, Pipeline* next,
 		       bool encrypt, unsigned char const* key,
-                       unsigned int key_bytes) :
+                       size_t key_bytes) :
     Pipeline(identifier, next),
     encrypt(encrypt),
     cbc_mode(true),
@@ -19,17 +19,17 @@ Pl_AES_PDF::Pl_AES_PDF(char const* identifier, Pipeline* next,
     use_specified_iv(false),
     disable_padding(false)
 {
-    unsigned int keybits = 8 * key_bytes;
+    size_t keybits = 8 * key_bytes;
     this->keylen = key_bytes;
     this->ctx = nullptr;
     assert(key_bytes == KEYLENGTH(keybits));
-    this->key = PointerHolder<uint32_t>(
+    this->key = PointerHolder<unsigned char>(
         true, new unsigned char[key_bytes]);
     this->rk = PointerHolder<uint32_t>(
         true, new uint32_t[RKLENGTH(keybits)]);
     size_t rk_bytes = RKLENGTH(keybits) * sizeof(uint32_t);
     std::memcpy(this->key.getPointer(), key, key_bytes);
-    std::memset(this->rk.getPointer, 0, rk_bytes);
+    std::memset(this->rk.getPointer(), 0, rk_bytes);
     std::memset(this->inbuf, 0, this->buf_size);
     std::memset(this->outbuf, 0, this->buf_size);
     std::memset(this->cbc_block, 0, this->buf_size);

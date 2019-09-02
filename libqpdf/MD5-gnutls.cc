@@ -24,7 +24,7 @@ void MD5::init()
 // context.
 
 void MD5::update(unsigned char *input,
-		 unsigned int inputLen)
+		 size_t inputLen)
 {
     if (ctx != nullptr && input != nullptr)
 	gnutls_hash(ctx, input, inputLen);
@@ -49,10 +49,10 @@ void MD5::transform(UINT4 state[4], unsigned char block[64])
 
 // Encodes input (UINT4) into output (unsigned char). Assumes len is a
 // multiple of 4.
-void MD5::encode(unsigned char *output, UINT4 *input, unsigned int len)
+void MD5::encode(unsigned char *output, UINT4 *input, size_t len)
 {}
 
 // Decodes input (unsigned char) into output (UINT4). Assumes len is a
 // multiple of 4.
-void MD5::decode(UINT4 *output, unsigned char *input, unsigned int len)
+void MD5::decode(UINT4 *output, unsigned char *input, size_t len)
 {}

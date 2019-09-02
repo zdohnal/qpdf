@@ -9,7 +9,7 @@ typedef uint32_t u32;
  * Init cryptographic context
  */
 void rijndaelInit(gnutls_cipher_hd_t * ctx, unsigned char * key,
-  unsigned int keylen, unsigned char cbc_block[16],
+  size_t keylen, unsigned char cbc_block[16],
   unsigned int buf_size)
 {
   int ret;
@@ -74,7 +74,7 @@ void rijndaelCBCDecrypt(gnutls_cipher_hd_t ctx,
 /**
  * Encrypt string by AES ECB by GNU TLS.
  */
-void rijndaelECBEncrypt(unsigned char * key, unsigned int keylen,
+void rijndaelECBEncrypt(unsigned char * key, size_t keylen,
   unsigned char cbc_block[16], const unsigned char ciphertext[16],
   unsigned char plaintext[16], unsigned int buf_size)
 {
@@ -90,7 +90,7 @@ void rijndaelECBEncrypt(unsigned char * key, unsigned int keylen,
 /**
  * Decrypt string by AES ECB by GNU TLS.
  */
-void rijndaelECBDecrypt(unsigned char * key, unsigned int keylen,
+void rijndaelECBDecrypt(unsigned char * key, size_t keylen,
   unsigned char cbc_block[16], const unsigned char ciphertext[16],
   unsigned char plaintext[16], unsigned int buf_size)
 {

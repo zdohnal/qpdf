@@ -8,7 +8,7 @@
 #include <gnutls/crypto.h>
 
 void rijndaelInit(gnutls_cipher_hd_t * context, unsigned char * key,
-  unsigned int keylen, unsigned char cbc_block[16], unsigned int buf_size);
+  size_t keylen, unsigned char cbc_block[16], unsigned int buf_size);
 int rijndaelSetupEncrypt(uint32_t *rk, const unsigned char *key,
   int keybits);
 int rijndaelSetupDecrypt(uint32_t *rk, const unsigned char *key,
@@ -19,10 +19,10 @@ void rijndaelCBCEncrypt(gnutls_cipher_hd_t context,
 void rijndaelCBCDecrypt(gnutls_cipher_hd_t context,
   const unsigned char ciphertext[16], unsigned char plaintext[16],
   unsigned int buf_size);
-void rijndaelECBEncrypt(unsigned char * key, unsigned int keylen,
+void rijndaelECBEncrypt(unsigned char * key, size_t keylen,
   unsigned char cbc_block[16], const unsigned char plaintext[16],
   unsigned char ciphertext[16], unsigned int buf_size);
-void rijndaelECBDecrypt(unsigned char * key, unsigned int keylen,
+void rijndaelECBDecrypt(unsigned char * key, size_t keylen,
   unsigned char cbc_block[16], const unsigned char ciphertext[16],
   unsigned char plaintext[16], unsigned int buf_size);
 void rijndaelFinish(gnutls_cipher_hd_t context);
